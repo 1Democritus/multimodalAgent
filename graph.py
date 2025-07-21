@@ -13,8 +13,7 @@ import systemPrompts
 from tools import *
 
 #setup API key and the large language model
-with open("key.txt", "r") as file:
-    os.environ["OPENAI_API_KEY"] = file.readline()
+os.environ["OPENAI_API_KEY"] = "YOUR API KEY HERE" #Put your API key here
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0)
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
