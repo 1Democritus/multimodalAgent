@@ -1,33 +1,63 @@
-import gradio as gr #needed for setting up interface
+import gradio as gr
 from langchain_core import messages
-import io
-from PIL import Image
 import base64
 from graph import eatronAssistant
 
 def isBase64(s):
     try:
-        # Attempt to decode and then re-encode and compare
         return base64.b64encode(base64.b64decode(s)) == s.encode()
     except:
         return False
 
-def invokeAgent(userInput, history, file): #function used by the GUI to return output to input message
+# Main function to handle chat input
+def invokeAgent(userInput, history, file):
     if userInput != "QUIT":
         try:
-            response = eatronAssistant.invoke({"messages": [messages.HumanMessage(content = userInput)], "file": file.name})
-            print(response['messages'][-1])
-            content = response['messages'][-1].content
-            if isBase64(content):
-                return f'<img src="data:image/png;base64,{content}" width="300"/>' #image tag used by gradio to streamline the image
-            else:
-                return content
-        except Exception as error:
-            return f"Error arose while processing request: {error}"
-    else:
-        raise gr.Error("Session ended by user.") #causes Interface to quit session by itself
+            response = eatronAssistant.invoke({
+                "messages": [messages.HumanMessage(content=userInput)],
+                "file": file.name
+            })
 
-fileInput = gr.File(label="Upload files") #so that it can also take files as input
-demo = gr.ChatInterface(save_history=False , fn = invokeAgent, additional_inputs = fileInput,title ="Agent Chat", type="messages")
-demo.saved_conversations.secret = "abcdefasd6200683922"
-demo.launch(share = False)
+            content = response['messages'][-1].content
+
+            if isBase64(content):
+                img_html = f'<img src="data:image/png;base64,{content}" width="300"/>'
+                history.append((userInput, img_html))
+            else:
+                history.append((userInput, content))
+        except Exception as error:
+            history.append((userInput, f"Error arose while processing request: {error}"))
+    else:
+        raise gr.Error("Session ended by user.")
+    
+    return history, history
+
+# Gradio Blocks UI
+with gr.Blocks(title="Agent Chat") as demo:
+    gr.Markdown("## Agent Chat")
+
+    chatbot = gr.Chatbot(render_markdown=False)
+    state = gr.State([])
+
+    with gr.Row():
+        fileInput = gr.File(label="Upload files")
+    
+    with gr.Row():
+        msg = gr.Textbox(placeholder="Type your message here...", show_label=False)
+        send_btn = gr.Button("Send")
+
+    # Bind send button click
+    send_btn.click(
+        invokeAgent,
+        inputs=[msg, state, fileInput],
+        outputs=[chatbot, state]
+    )
+
+    # Also bind Enter key submission
+    msg.submit(
+        invokeAgent,
+        inputs=[msg, state, fileInput],
+        outputs=[chatbot, state]
+    )
+
+demo.launch(share=False)
