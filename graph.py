@@ -7,14 +7,14 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 import pandas
 import os
+from dotenv import load_dotenv
 
 #import necessary files
 import systemPrompts
 from tools import *
 
 #setup API key and the large language model
-with open("myWork/key.txt", "r") as file:
-    os.environ["OPENAI_API_KEY"] = file.readline() #put your own API key on this line 
+load_dotenv() #sets up my API key from my environment
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0)
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
