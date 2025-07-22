@@ -4,7 +4,7 @@ from typing_extensions import TypedDict
 from langchain_core import messages
 from langchain_openai import ChatOpenAI
 from langgraph.graph.message import add_messages
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, START, END
 import pandas
 import os
 
@@ -13,8 +13,8 @@ import systemPrompts
 from tools import *
 
 #setup API key and the large language model
-with open("key.txt", "r") as file:
-    os.environ["OPENAI_API_KEY"] = file.readline()
+with open("myWork/key.txt", "r") as file:
+    os.environ["OPENAI_API_KEY"] = file.readline() #put your own API key on this line 
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0)
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
@@ -26,6 +26,12 @@ def trimNode(state: llmAgent) -> llmAgent:
     """Removes least recent messages after the chat history reaches a certain size"""
     state['messages'] = state['messages'][4:]
     return state
+
+def loadRouter(state: llmAgent) -> llmAgent:
+    if state['file'] == "":
+        return "evaluateEdge"
+    else:
+        return "loadEdge"
 
 def trimRouter(state: llmAgent) -> llmAgent: #to check if chat history is too long
     if len(state['messages']) > 15:
@@ -39,8 +45,17 @@ def agentRouter(state: llmAgent) -> llmAgent: #decides if this prompt is for the
         return "plotEdge"
     elif key == "A":
         return "analyzeEdge"
+    elif key == "E":
+        return "evaluateEdge"
     else:
         raise ValueError("Prompt doesn't have A or P at start like it should")
+    
+def agentRouterTwo(state: llmAgent) -> llmAgent:
+    key = state['messages'][-2].content[1]
+    if key == "E":
+        return "evaluateEdge"
+    else:
+        return "routerEdge"
     
 def loadData(state:llmAgent) -> llmAgent:
     """Used to load data from a saved file and use it to create a pandas dataframe"""
@@ -67,12 +82,12 @@ def analyticsAgent(state: llmAgent) -> llmAgent:
         toolResults = []
         for toolCall in response.tool_calls:
             tool = next(t for t in analyticTools if t.name == toolCall['name'])
-            result = tool.invoke(toolCall['args'])
+            result = messages.AIMessage(tool.invoke(toolCall['args']))
             toolResults.append(result)
         #state['messages'].append(messages.AIMessage(toolResults[0]))
         state['messages'] = state['messages'] + toolResults
     else:
-        state['messages'] = state['messages'] + response
+        state['messages'] = state['messages'] + [response]
     return state
 
 def plotAgent(state:llmAgent) -> llmAgent:
@@ -86,19 +101,21 @@ def plotAgent(state:llmAgent) -> llmAgent:
         toolResults = []
         for toolCall in response.tool_calls:
             tool = next(t for t in plottingTools if t.name == toolCall['name'])
-            result = tool.invoke(toolCall['args'])
+            result = messages.AIMessage(tool.invoke(toolCall['args']))
             toolResults.append(result)
         #state['messages'].append(messages.AIMessage(toolResults[0]))
 
         state['messages'] = state['messages'] + toolResults
+        print("data plotted")
     else:
-        state['messages'] = state['messages'] + response
+        print("no tool call")
+        state['messages'] = state['messages'] + [response]
     return state
 
-def evaluateAgent(state: llmAgent) -> llmAgent:
+def evaluateAgent(state: llmAgent) -> llmAgent: #needs tools to access the previous agents' data
     systemPrompt = messages.SystemMessage(content = systemPrompts.evaluateAgentPrompt)
-    response = llm.invoke(systemPrompt + state['messages'])
-    state['messages'] = state['messages'] + response
+    response = llm.invoke([systemPrompt] + state['messages'])
+    state['messages'] = state['messages'] + [response]
     return state
 
 #adding all the nodes in the langgraph
@@ -108,17 +125,17 @@ agentGraph.add_node("promptAgent", promptAgent)
 agentGraph.add_node("plotAgent", plotAgent)
 agentGraph.add_node("analyticAgent", analyticsAgent)
 agentGraph.add_node("evaluateAgent", evaluateAgent)
+agentGraph.add_node("router", lambda x: x)
 agentGraph.add_node("trimNode", trimNode)
 
 #adding the edges needed for travel between nodes
-agentGraph.set_entry_point("loadData")
+agentGraph.add_conditional_edges(START, loadRouter, {"loadEdge": "loadData", "evaluateEdge": "evaluateAgent"})
 agentGraph.add_edge("loadData", "promptAgent")
-agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "analyzeEdge": "analyticAgent"})
-agentGraph.add_conditional_edges("plotAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END}) 
-agentGraph.add_conditional_edges("analyticAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END}) 
-#agentGraph.add_edge("plotAgent", "evaluateAgent")
-#agentGraph.add_edge("analyticAgent", "evaluateAgent")
-#agentGraph.add_conditional_edges("evaluateAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
+agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "analyzeEdge": "analyticAgent", "evaluateEdge": "evaluateAgent"})
+agentGraph.add_conditional_edges("plotAgent", agentRouterTwo, {"evaluateEdge": "evaluateAgent", "routerEdge": "router"})
+agentGraph.add_conditional_edges("analyticAgent", agentRouterTwo, {"evaluateEdge": "evaluateAgent", "routerEdge": "router"})
+agentGraph.add_edge("evaluateAgent", "router")
+agentGraph.add_conditional_edges("router", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
 agentGraph.add_edge("trimNode", END)
 
 eatronAssistant = agentGraph.compile()
