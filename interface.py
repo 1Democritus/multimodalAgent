@@ -15,13 +15,11 @@ def isBase64(s):
 def invokeAgent(userInput, history, file): #function used by the GUI to return output to input message
     if userInput != "QUIT":
         try:
-            response = eatronAssistant.invoke({"messages": [messages.HumanMessage(content = userInput)], "file": file.name}) 
-            print(response)
+            response = eatronAssistant.invoke({"messages": [messages.HumanMessage(content = userInput)], "file": file.name})
             print(response['messages'][-1])
             content = response['messages'][-1].content
             if isBase64(content):
-                htmlImg = f"![image](data:image/png;base64, {content})"
-                return htmlImg
+                return f'<img src="data:image/png;base64,{content}" width="300"/>' #image tag used by gradio to streamline the image
             else:
                 return content
         except Exception as error:
