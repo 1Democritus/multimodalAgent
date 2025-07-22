@@ -1,7 +1,10 @@
 import gradio as gr
+import os
 from langchain_core import messages
 import base64
 from graph import eatronAssistant
+
+server = None
 
 def isBase64(s):
     try:
@@ -13,29 +16,43 @@ def isBase64(s):
 def invokeAgent(userInput, history, file):
     if userInput != "QUIT":
         try:
-            response = eatronAssistant.invoke({
+            try:
+                response = eatronAssistant.invoke({
                 "messages": [messages.HumanMessage(content=userInput)],
                 "file": file.name
-            })
+                 })
+            except:
+                response = eatronAssistant.invoke({
+                "messages": [messages.HumanMessage(content=userInput)],
+                "file": "" #for if no file was inputted
+                 })
+            
+            if isinstance(response['messages'][-2], messages.HumanMessage): #meaning only plot/analyse/evaluation, not one of the former followed by the latter
+                content = response['messages'][-1].content
 
-            content = response['messages'][-1].content
-
-            if isBase64(content):
-                img_html = f'<img src="data:image/png;base64,{content}" width="300"/>'
-                history.append((userInput, img_html))
+                if isBase64(content):
+                    img_html = f'<img src="data:image/png;base64,{content}" width="300"/>'
+                    history.append((userInput, img_html))
+                else:
+                    history.append((userInput, content))
             else:
-                history.append((userInput, content))
+                imgContent = response['messages'][-2].content
+                textContent = response['messages'][-1].content
+                totalContent = imgContent + " " + textContent
+                history.append((userInput, totalContent)) #adds to chat history
         except Exception as error:
             history.append((userInput, f"Error arose while processing request: {error}"))
     else:
-        gr.close_all()
+        if server:
+            server.close() #shuts down server
+        os._exit(1) #stops code from running
         
     
     return history, history
 
 # Gradio Blocks UI
 with gr.Blocks(title="Agent Chat") as demo:
-    gr.Markdown("## Agent Chat")
+    gr.Markdown("## Agent Chat - type QUIT to end the conversation")
 
     chatbot = gr.Chatbot(render_markdown=False)
     state = gr.State([])
@@ -61,4 +78,4 @@ with gr.Blocks(title="Agent Chat") as demo:
         outputs=[chatbot, state]
     )
 
-demo.launch(share=False)
+server = demo.launch(share=False)
