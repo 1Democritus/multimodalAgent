@@ -9,7 +9,7 @@ def isBase64(s):
     try:
         # Attempt to decode and then re-encode and compare
         return base64.b64encode(base64.b64decode(s)) == s.encode()
-    except Exception:
+    except:
         return False
 
 def invokeAgent(userInput, history, file): #function used by the GUI to return output to input message
