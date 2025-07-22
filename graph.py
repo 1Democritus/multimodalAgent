@@ -13,7 +13,8 @@ import systemPrompts
 from tools import *
 
 #setup API key and the large language model
-os.environ["OPENAI_API_KEY"] = "YOUR API KEY HERE" #Put your API key here
+with open("key.txt", "r") as file:
+    os.environ["OPENAI_API_KEY"] = file.readline()
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0)
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
@@ -94,20 +95,28 @@ def plotAgent(state:llmAgent) -> llmAgent:
         state['messages'] = state['messages'] + response
     return state
 
+def evaluateAgent(state: llmAgent) -> llmAgent:
+    systemPrompt = messages.SystemMessage(content = systemPrompts.evaluateAgentPrompt)
+    response = llm.invoke(systemPrompt + state['messages'])
+    state['messages'] = state['messages'] + response
+    return state
+
 #adding all the nodes in the langgraph
 agentGraph = StateGraph(llmAgent)
 agentGraph.add_node("loadData", loadData)
 agentGraph.add_node("promptAgent", promptAgent)
 agentGraph.add_node("plotAgent", plotAgent)
 agentGraph.add_node("analyticAgent", analyticsAgent)
+agentGraph.add_node("evaluateAgent", evaluateAgent)
 agentGraph.add_node("trimNode", trimNode)
 
 #adding the edges needed for travel between nodes
 agentGraph.set_entry_point("loadData")
 agentGraph.add_edge("loadData", "promptAgent")
 agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "analyzeEdge": "analyticAgent"})
-agentGraph.add_conditional_edges("plotAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
-agentGraph.add_conditional_edges("analyticAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
+agentGraph.add_edge("plotAgent", "evaluateAgent")
+agentGraph.add_edge("analyticAgent", "evaluateAgent")
+agentGraph.add_conditional_edges("evaluateAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
 agentGraph.add_edge("trimNode", END)
 
 eatronAssistant = agentGraph.compile()
