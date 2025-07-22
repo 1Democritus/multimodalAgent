@@ -28,7 +28,8 @@ def invokeAgent(userInput, history, file):
         except Exception as error:
             history.append((userInput, f"Error arose while processing request: {error}"))
     else:
-        raise gr.Error("Session ended by user.")
+        gr.close_all()
+        
     
     return history, history
 
