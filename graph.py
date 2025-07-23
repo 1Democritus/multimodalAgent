@@ -26,7 +26,7 @@ class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
     df: Any #allows for unique data types such as pandas dataframes to be passed on
 
 def clearNode(state:llmAgent) -> llmAgent:
-    state['messages'] = ''
+    state['messages'] = []
     return state
 
 def trimNode(state: llmAgent) -> llmAgent:
