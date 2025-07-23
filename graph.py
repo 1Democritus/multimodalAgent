@@ -5,17 +5,20 @@ from langchain_core import messages
 from langchain_openai import ChatOpenAI
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
+from langgraph.prebuilt import ToolNode
 import pandas
-import os
 from dotenv import load_dotenv
+
+
 
 #import necessary files
 import systemPrompts
 from tools import *
 
 #setup API key and the large language model
-load_dotenv() #sets up my API key from my environment
+load_dotenv() #loads in API key from environment
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0)
+llm.bind_tools([convertImage])
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
     messages: Annotated[Sequence[messages.BaseMessage], add_messages]
@@ -28,7 +31,7 @@ def trimNode(state: llmAgent) -> llmAgent:
     return state
 
 def loadRouter(state: llmAgent) -> llmAgent:
-    if state['file'] == "":
+    if state['file'] == "" or state['messages'][-1].content[0] =="E":
         return "evaluateEdge"
     else:
         return "loadEdge"
@@ -57,13 +60,17 @@ def agentRouterTwo(state: llmAgent) -> llmAgent:
     else:
         return "routerEdge"
     
+def evaluationRouter(state: llmAgent) -> llmAgent:
+    lastMsg = state['messages'][-1]
+    if not lastMsg.tool_calls:
+        return "routerEdge"
+    else:
+        return "toolEdge"
+    
 def loadData(state:llmAgent) -> llmAgent:
     """Used to load data from a saved file and use it to create a pandas dataframe"""
-    try:
-        state['df'] = pandas.read_csv(state['file']) #loads the input file into the code
-        return state
-    except:
-        raise TypeError("The passed on file should have a .csv extension")
+    state['df'] = pandas.read_csv(state['file']) #loads the input file into the code
+    return state
 
 def promptAgent(state: llmAgent) -> llmAgent:
     systemPrompt = messages.SystemMessage(content = systemPrompts.promptAgentPrompt)
@@ -109,9 +116,7 @@ def plotAgent(state:llmAgent) -> llmAgent:
         #state['messages'].append(messages.AIMessage(toolResults[0]))
 
         state['messages'] = state['messages'] + toolResults
-        print("data plotted")
     else:
-        print("no tool call")
         state['messages'] = state['messages'] + [response]
     return state
 
@@ -128,6 +133,8 @@ agentGraph.add_node("promptAgent", promptAgent)
 agentGraph.add_node("plotAgent", plotAgent)
 agentGraph.add_node("analyticAgent", analyticsAgent)
 agentGraph.add_node("evaluateAgent", evaluateAgent)
+evaluateTool = ToolNode(tools = [convertImage])
+agentGraph.add_node("evaluateTool", evaluateTool)
 agentGraph.add_node("router", lambda x: x)
 agentGraph.add_node("trimNode", trimNode)
 
@@ -137,7 +144,8 @@ agentGraph.add_edge("loadData", "promptAgent")
 agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "analyzeEdge": "analyticAgent", "evaluateEdge": "evaluateAgent"})
 agentGraph.add_conditional_edges("plotAgent", agentRouterTwo, {"evaluateEdge": "evaluateAgent", "routerEdge": "router"})
 agentGraph.add_conditional_edges("analyticAgent", agentRouterTwo, {"evaluateEdge": "evaluateAgent", "routerEdge": "router"})
-agentGraph.add_edge("evaluateAgent", "router")
+agentGraph.add_conditional_edges("evaluateAgent", evaluationRouter, {"routerEdge": "router", "toolEdge": "evaluateTool"})
+agentGraph.add_edge("evaluateTool", "evaluateAgent")
 agentGraph.add_conditional_edges("router", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
 agentGraph.add_edge("trimNode", END)
 
