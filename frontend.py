@@ -16,9 +16,6 @@ def isBase64(s):
 def invokeAgent(userInput, history, file):
     if userInput != "QUIT":
         try:
-            if file:
-                if not file.name.endswith(".csv"):
-                    raise AttributeError("input file should end with .csv")
             try:
                 response = eatronAssistant.invoke({
                 "messages": [messages.HumanMessage(content=userInput)],
@@ -51,29 +48,36 @@ def invokeAgent(userInput, history, file):
             server.close() #shuts down server
         os._exit(0) #stops code from running
         #I would recommend using os over sys here because sys only stops the subprocess, not the whole code
-        
     
     return history, history
 
 # Gradio Blocks UI
 with gr.Blocks(title="Agent Chat") as demo:
-    gr.Markdown("## Agent Chat - type QUIT to end the conversation")
+    gr.Markdown("""# Eatron Agent
+    Upload data csv and give your request
+    receive novel insights
+    to stop the process, enter QUIT
+                """)
 
-    chatbot = gr.Chatbot(render_markdown=False)
+    chatbot = gr.Chatbot(render_markdown=False, height = 500)
     state = gr.State([])
 
-    with gr.Row():
-        fileInput = gr.File(label = " Upload a csv file ")
+    with gr.Row(equal_height = True):
+        fileInput = gr.File(label = " Upload a csv file ", file_types = [".csv"], interactive = True)
     
-    with gr.Row():
-        msgBox = gr.Textbox(placeholder = "Type your message here...", show_label = False)
+    with gr.Row(equal_height = True):
+        msgBox = gr.Textbox(placeholder = "Enter your request here", show_label = False)
         sendBtn = gr.Button("Send")
+
+    with gr.Row(): #displays ... while chatbot is processing
+        status = gr.Markdown("")
 
     # Bind send button click
     sendBtn.click(
         invokeAgent,
         inputs=[msgBox, state, fileInput],
-        outputs=[chatbot, state]
+        outputs=[chatbot, state],
+        show_progress = True
     )
 
     # Also bind Enter key submission
