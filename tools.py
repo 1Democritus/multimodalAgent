@@ -5,12 +5,6 @@ import io
 import base64
 from PIL import Image
 
-def printColumnsWrapper(df):
-    @tool
-    def printColumns():
-        return str(df.columns)
-    return printColumns
-
 def plotDataWrapper(df): #I use wrappers because it allows the tools to access internal variables within agents such as dataframes
     @tool
     def plotData(xLabel: str, yLabel: str):
