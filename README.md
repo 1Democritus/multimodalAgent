@@ -5,8 +5,7 @@ Building on first demo of an agent which can take data from an input table, an p
 - Displaying the distribution of a column of data
 - Displaying a row of anomalies for a column with a given z-score threshold
 - return x columns with highest correlation with a column of the employee's choosing
-- An evaluation agent, which in the future will give insight to the data
+- An evaluation agent, which can analyse previous plots and results
 
 Future tools include:
 - Tools to manipulate qualitative data
-- Tools for evaluation agent to access data from previous agents' works
