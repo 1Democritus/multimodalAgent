@@ -58,7 +58,7 @@ with gr.Blocks(title="Agent Chat") as demo:
     state = gr.State([])
 
     with gr.Row():
-        fileInput = gr.File(label="Upload files")
+        fileInput = gr.File(label="Upload a csv file")
     
     with gr.Row():
         msg = gr.Textbox(placeholder="Type your message here...", show_label=False)
