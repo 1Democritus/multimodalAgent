@@ -59,8 +59,11 @@ def agentRouterTwo(state: llmAgent) -> llmAgent:
     
 def loadData(state:llmAgent) -> llmAgent:
     """Used to load data from a saved file and use it to create a pandas dataframe"""
-    state['df'] = pandas.read_csv(state['file']) #loads the input file into the code
-    return state
+    try:
+        state['df'] = pandas.read_csv(state['file']) #loads the input file into the code
+        return state
+    except:
+        raise TypeError("The passed on file should have a .csv extension")
 
 def promptAgent(state: llmAgent) -> llmAgent:
     systemPrompt = messages.SystemMessage(content = systemPrompts.promptAgentPrompt)
