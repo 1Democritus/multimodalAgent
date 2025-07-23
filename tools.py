@@ -5,8 +5,11 @@ import io
 import base64
 from PIL import Image
 
-#possible additions:
-#encoder for qualitative data
+def printColumnsWrapper(df):
+    @tool
+    def printColumns():
+        return str(df.columns)
+    return printColumns
 
 def plotDataWrapper(df): #I use wrappers because it allows the tools to access internal variables within agents such as dataframes
     @tool
