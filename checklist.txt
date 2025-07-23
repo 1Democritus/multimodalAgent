@@ -1,0 +1,7 @@
+File validation (make it csv)
+Fix plotting (maybe use scatter?)
+Give evaluation agent analysis tools
+
+
+
+...condense agent count
