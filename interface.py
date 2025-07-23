@@ -16,6 +16,9 @@ def isBase64(s):
 def invokeAgent(userInput, history, file):
     if userInput != "QUIT":
         try:
+            if file:
+                if not file.name.endswith(".csv"):
+                    raise AttributeError("input file should end with .csv")
             try:
                 response = eatronAssistant.invoke({
                 "messages": [messages.HumanMessage(content=userInput)],
@@ -37,8 +40,9 @@ def invokeAgent(userInput, history, file):
                     history.append((userInput, content))
             else:
                 imgContent = response['messages'][-2].content
+                imgMarkdown = f'<img src="data:image/png;base64,{imgContent}" width="300"/>'
                 textContent = response['messages'][-1].content
-                totalContent = imgContent + " " + textContent
+                totalContent = imgMarkdown + " " + textContent
                 history.append((userInput, totalContent)) #adds to chat history
         except Exception as error:
             history.append((userInput, f"Error arose while processing request: {error}"))
@@ -58,10 +62,10 @@ with gr.Blocks(title="Agent Chat") as demo:
     state = gr.State([])
 
     with gr.Row():
-        fileInput = gr.File(label="Upload a csv file")
+        fileInput = gr.File(label = " Upload a csv file ")
     
     with gr.Row():
-        msg = gr.Textbox(placeholder="Type your message here...", show_label=False)
+        msg = gr.Textbox(placeholder = "Type your message here...", show_label = False)
         send_btn = gr.Button("Send")
 
     # Bind send button click
@@ -78,4 +82,4 @@ with gr.Blocks(title="Agent Chat") as demo:
         outputs=[chatbot, state]
     )
 
-server = demo.launch(share=False)
+server = demo.launch(share = False)
