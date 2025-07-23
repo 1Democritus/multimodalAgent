@@ -71,14 +71,14 @@ with gr.Blocks(title="Agent Chat") as demo:
     # Bind send button click
     sendBtn.click(
         invokeAgent,
-        inputs=[msg, state, fileInput],
+        inputs=[msgBox, state, fileInput],
         outputs=[chatbot, state]
     )
 
     # Also bind Enter key submission
     msgBox.submit(
         invokeAgent,
-        inputs=[msg, state, fileInput],
+        inputs=[msgBox, state, fileInput],
         outputs=[chatbot, state]
     )
 
