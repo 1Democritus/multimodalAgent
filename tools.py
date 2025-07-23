@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import zscore
 import io
 import base64
+from PIL import Image
 
 #possible additions:
 #encoder for qualitative data
@@ -11,7 +12,7 @@ def plotDataWrapper(df): #I use wrappers because it allows the tools to access i
     @tool
     def plotData(xLabel: str, yLabel: str):
         """Used to plot a group of x data and y data, giving both axes an appropriate label"""
-        plt.plot(df[xLabel], df[yLabel])
+        plt.scatter(df[xLabel], df[yLabel])
         plt.xlabel(xLabel)
         plt.ylabel(yLabel)
         buffer = io.BytesIO() #saves plot into buffer file
@@ -115,3 +116,9 @@ def returnDescriptionWrapper(df):
         description = df[column].describe()
         return str(description)
     return returnDescription
+
+@tool
+def convertImage(imageEncoding: str):
+    """Decodes a base64 encoded image"""
+    imgData = base64.b64decode(imageEncoding)
+    return Image.open(io.BytesIO(imgData))
