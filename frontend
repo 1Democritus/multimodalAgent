@@ -65,18 +65,18 @@ with gr.Blocks(title="Agent Chat") as demo:
         fileInput = gr.File(label = " Upload a csv file ")
     
     with gr.Row():
-        msg = gr.Textbox(placeholder = "Type your message here...", show_label = False)
-        send_btn = gr.Button("Send")
+        msgBox = gr.Textbox(placeholder = "Type your message here...", show_label = False)
+        sendBtn = gr.Button("Send")
 
     # Bind send button click
-    send_btn.click(
+    sendBtn.click(
         invokeAgent,
         inputs=[msg, state, fileInput],
         outputs=[chatbot, state]
     )
 
     # Also bind Enter key submission
-    msg.submit(
+    msgBox.submit(
         invokeAgent,
         inputs=[msg, state, fileInput],
         outputs=[chatbot, state]
