@@ -7,6 +7,13 @@ Building on first demo of an agent which can take data from an input table, an p
 - return x columns with highest correlation with a column of the employee's choosing
 - An evaluation agent, which can analyse previous plots and results
 
+Used langgraph for the internal agent structure, as it gives a clean, robust architecture to the relationship between different agents and their tools
+Used gradio to build the chat interface, as it is flexible with usage
+
 Future updates include:
 - Tools to manipulate qualitative data
 - Possibly merging the plotting and analysing agent 
+
+
+Omissions:
+- Streaming the output in tokens as Langgraph doesn't support streaming to an interface
