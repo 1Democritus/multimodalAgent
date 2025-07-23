@@ -49,7 +49,7 @@ def invokeAgent(userInput, history, file):
     else:
         if server:
             server.close() #shuts down server
-        os._exit(1) #stops code from running
+        os._exit(0) #stops code from running
         #I would recommend using os over sys here because sys only stops the subprocess, not the whole code
         
     
