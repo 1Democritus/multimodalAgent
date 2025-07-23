@@ -11,6 +11,13 @@ def isBase64(s):
         return base64.b64encode(base64.b64decode(s)) == s.encode()
     except:
         return False
+    
+def clearChat(): #clears chat as well as message history on internal files
+    eatronAssistant.invoke({
+        "messages": [messages.HumanMessage(content = "Code Black")],
+        "file": ""
+    })
+    return [], []
 
 # Main function to handle chat input
 def invokeAgent(userInput, history, file):
@@ -54,12 +61,12 @@ def invokeAgent(userInput, history, file):
 # Gradio Blocks UI
 with gr.Blocks(title="Agent Chat") as demo:
     gr.Markdown("""# Eatron Agent
-    Upload data csv and give your request
-    receive novel insights
+    Upload data csv and give your request;
+    receive novel insights;
     to stop the process, enter QUIT
                 """)
 
-    chatbot = gr.Chatbot(render_markdown=False, height = 500)
+    chatbot = gr.Chatbot(render_markdown=False, height = 600)
     state = gr.State([])
 
     with gr.Row(equal_height = True):
@@ -68,6 +75,7 @@ with gr.Blocks(title="Agent Chat") as demo:
     with gr.Row(equal_height = True):
         msgBox = gr.Textbox(placeholder = "Enter your request here", show_label = False)
         sendBtn = gr.Button("Send")
+        clearBtn = gr.Button("Click here to clean chat")
 
     with gr.Row(): #displays ... while chatbot is processing
         status = gr.Markdown("")
@@ -78,6 +86,12 @@ with gr.Blocks(title="Agent Chat") as demo:
         inputs=[msgBox, state, fileInput],
         outputs=[chatbot, state],
         show_progress = True
+    )
+
+    clearBtn.click(
+        clearChat,
+        inputs = [],
+        outputs = [chatbot, state]
     )
 
     # Also bind Enter key submission
