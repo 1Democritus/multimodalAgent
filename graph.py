@@ -25,13 +25,20 @@ class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
     file: str
     df: Any #allows for unique data types such as pandas dataframes to be passed on
 
+def clearNode(state:llmAgent) -> llmAgent:
+    state['messages'] = ''
+    return state
+
 def trimNode(state: llmAgent) -> llmAgent:
     """Removes least recent messages after the chat history reaches a certain size"""
     state['messages'] = state['messages'][4:]
     return state
 
-def loadRouter(state: llmAgent) -> llmAgent:
-    if state['file'] == "" or state['messages'][-1].content[0] =="E":
+def initialRouter(state: llmAgent) -> llmAgent:
+    lastMessage = state['messages'][-1].content
+    if lastMessage == "Code White":
+        return "clearEdge"
+    elif state['file'] == "" or lastMessage[0] =="E":
         return "evaluateEdge"
     else:
         return "loadEdge"
@@ -128,6 +135,7 @@ def evaluateAgent(state: llmAgent) -> llmAgent: #needs tools to access the previ
 
 #adding all the nodes in the langgraph
 agentGraph = StateGraph(llmAgent)
+agentGraph.add_node("clearNode", clearNode)
 agentGraph.add_node("loadData", loadData)
 agentGraph.add_node("promptAgent", promptAgent)
 agentGraph.add_node("plotAgent", plotAgent)
@@ -139,7 +147,8 @@ agentGraph.add_node("router", lambda x: x)
 agentGraph.add_node("trimNode", trimNode)
 
 #adding the edges needed for travel between nodes
-agentGraph.add_conditional_edges(START, loadRouter, {"loadEdge": "loadData", "evaluateEdge": "evaluateAgent"})
+agentGraph.add_conditional_edges(START, initialRouter, {"loadEdge": "loadData", "evaluateEdge": "evaluateAgent", "clearEdge": "clearNode"})
+agentGraph.add_edge("clearNode", END)
 agentGraph.add_edge("loadData", "promptAgent")
 agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "analyzeEdge": "analyticAgent", "evaluateEdge": "evaluateAgent"})
 agentGraph.add_conditional_edges("plotAgent", agentRouterTwo, {"evaluateEdge": "evaluateAgent", "routerEdge": "router"})
