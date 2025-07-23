@@ -7,5 +7,6 @@ Building on first demo of an agent which can take data from an input table, an p
 - return x columns with highest correlation with a column of the employee's choosing
 - An evaluation agent, which can analyse previous plots and results
 
-Future tools include:
+Future updates include:
 - Tools to manipulate qualitative data
+- Possibly merging the plotting and analysing agent 
