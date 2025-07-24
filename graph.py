@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 
 #import necessary files
-import graphUtils.systemPrompts
+from graphUtils import systemPrompts
 from graphUtils.tools import *
 
 #setup API key and the large language model
