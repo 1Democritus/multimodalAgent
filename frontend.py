@@ -101,4 +101,4 @@ with gr.Blocks(title="Agent Chat") as demo:
         outputs=[chatbot, state]
     )
 
-server = demo.launch(share = False)
+server = demo.launch(share = True)
