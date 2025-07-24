@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 
 
 #import necessary files
-import systemPrompts
-from tools import *
+import graphUtils.systemPrompts
+from graphUtils.tools import *
 
 #setup API key and the large language model
 load_dotenv() #loads in API key from environment
