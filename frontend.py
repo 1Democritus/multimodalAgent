@@ -2,6 +2,8 @@ import gradio as gr
 import os
 from langchain_core import messages
 import base64
+from dotenv import load_dotenv
+load_dotenv(override = True) #loads in API key from environment
 from graph import eatronAssistant
 
 server = None
@@ -101,4 +103,4 @@ with gr.Blocks(title="Agent Chat") as demo:
         outputs=[chatbot, state]
     )
 
-server = demo.launch(share = True)
+server = demo.launch(share = False)
