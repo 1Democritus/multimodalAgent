@@ -20,13 +20,6 @@ def plotDataWrapper(df): #I use wrappers because it allows the tools to access i
         return imgBase64
     return plotData
 
-def displayDataWrapper():
-    @tool
-    def displayData(bufferFile):
-        """Used to display data after plotting it, or after the user wants to see it again"""
-        return bufferFile
-    return displayData
-
 def displayDistributionWrapper(df): #should fix this later
     @tool
     def displayDistribution(columnName: str):
