@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from scipy.stats import zscore
 import io
 import base64
-from PIL import Image
 
 def plotDataWrapper(df): #I use wrappers because it allows the tools to access internal variables within agents such as dataframes
     @tool
@@ -106,9 +105,3 @@ def returnDescriptionWrapper(df):
         description = df[column].describe()
         return str(description)
     return returnDescription
-
-@tool
-def convertImage(imageEncoding: str):
-    """Decodes a base64 encoded image"""
-    imgData = base64.b64decode(imageEncoding)
-    return Image.open(io.BytesIO(imgData))
