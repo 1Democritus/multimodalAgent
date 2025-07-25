@@ -1,6 +1,6 @@
 # multimodalAgent
 
-Building on first demo of an agent which can take data from an input table, an perform actions required by employees: such as 
+Building an agent which can take data from an input table, an perform actions required by employees: such as 
 - Plotting two axes of data against each other
 - Displaying the distribution of a column of data
 - Displaying a row of anomalies for a column with a given z-score threshold
@@ -10,9 +10,6 @@ Building on first demo of an agent which can take data from an input table, an p
 Used langgraph for the internal agent structure, as it gives a clean, robust architecture to the relationship between different agents and their tools
 Used gradio to build the chat interface, as it is flexible with usage
 
-Future updates include:
-- Tools to manipulate qualitative data
-- Possibly merging the plotting and analysing agent 
 
 
 Omissions:
