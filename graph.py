@@ -37,7 +37,7 @@ def initialRouter(state: llmAgent) -> llmAgent:
     lastMessage = state['messages'][-1].content
     if lastMessage == "Code White":
         return "clearEdge"
-    elif state['file'] == "" or lastMessage[0] =="E":
+    elif state['file'] == "":
         return "evaluateEdge"
     else:
         return "loadEdge"
