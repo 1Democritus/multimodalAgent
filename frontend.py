@@ -6,6 +6,14 @@ from dotenv import load_dotenv
 load_dotenv(override = True) #loads in API key from environment
 from graph import eatronAssistant
 
+class Conversation:
+    def __init__(self):
+        self._history = []
+    def storeHistory(self, history):
+        self._history = history
+    def getHistory(self):
+        return self._history
+
 server = None
 
 def isBase64(s):
@@ -22,19 +30,16 @@ def clearChat(): #clears chat as well as message history on internal files
     return [], []
 
 # Main function to handle chat input
+conversationStorage = Conversation()
 def invokeAgent(userInput, history, file):
+    msghist = conversationStorage.getHistory()
     if userInput != "QUIT":
         try:
-            try:
-                response = eatronAssistant.invoke({
-                "messages": [messages.HumanMessage(content=userInput)],
-                "file": file.name
-                 })
-            except:
-                response = eatronAssistant.invoke({
-                "messages": [messages.HumanMessage(content=userInput)],
-                "file": "" #for if no file was inputted
-                 })
+            response = eatronAssistant.invoke({
+            "messages": msghist + [messages.HumanMessage(content=userInput)],
+            "file": file.name if file else ""
+                })
+            conversationStorage.storeHistory(response['messages'])
             
             if isinstance(response['messages'][-2], messages.HumanMessage): #meaning only plot/analyse/evaluation, not one of the former followed by the latter
                 content = response['messages'][-1].content
@@ -57,7 +62,6 @@ def invokeAgent(userInput, history, file):
             server.close() #shuts down server
         os._exit(0) #stops code from running
         #I would recommend using os over sys here because sys only stops the subprocess, not the whole code
-    
     return history, history
 
 # Gradio Blocks UI
