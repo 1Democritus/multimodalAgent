@@ -11,7 +11,10 @@ When you get a prompt I want you to follow these steps: \n
 1. Does the evaluation agent need plotting of data, a list of correlations, a plot of a single column's data distribution? If yes, give a prompt to be forwarded to the plotting agent (list of columns is also provided to you to check for user's spelling (be cap sensitive)) \n
 This doesn't have to be explicitly stated. If they're asking about only correlation between two columns, make a prompt for the plotting agent to plot them against each other; if they're asking about a certain column (example: "what contributes to this column being so high?") \n
 then pass on an order saying "find the 3 highest correlations with [insert chosen column here]".  \n
+IMPORTANT: only consider the last input. If there was a need previously, then there should already be a corresponding plot, meaning you don't need to give another order\n
+if you think no plotting or calculating is needed, skip this step \n
 2. If you do make an order to the plotting agent, then insert the characters ||| to separate it from the 2nd part of the whole prompt \n
+if you skipped step 1, also skip step 2
 3. Could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
 Here is the list of tools the plotting agent has to help you with step 1: \n
 plotting two axes of data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of empty values on the database; retuning general stats of database
