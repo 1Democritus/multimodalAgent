@@ -18,7 +18,6 @@ from graphUtils.tools import *
 
 #setup API key and the large language model
 llm = ChatOpenAI(model = "gpt-4o", temperature = 0.1)
-llm.bind_tools([convertImage])
 
 class llmAgent(TypedDict): #stores internal data to be used throughout the Graph
     messages: Annotated[Sequence[messages.BaseMessage], add_messages]
@@ -80,7 +79,6 @@ def plotAgent(state:llmAgent) -> llmAgent:
     wholePrompt = state['messages'][-1].content
     wholePrompt = wholePrompt.split("|||")
     currentPlotInstruction = messages.HumanMessage(wholePrompt[0])
-    state['messages'][-1] = messages.HumanMessage(content = wholePrompt[1])
     systemPrompt = messages.SystemMessage(content = systemPrompts.plotAgentPrompt)
     plottingTools = [plotDataWrapper(state['df']), displayDistributionWrapper(state['df']), 
                      checkMaxCorrelationWrapper(state['df']), checkMinCorrelationWrapper(state['df']), 
@@ -95,6 +93,10 @@ def plotAgent(state:llmAgent) -> llmAgent:
             tool = next(t for t in plottingTools if t.name == toolCall['name'])
             result = messages.AIMessage(content = tool.invoke(toolCall['args']))
             toolResults.append(result)
+        try:
+            state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1]}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
+        except Exception as e:
+            print(e)
         state['messages'] = state['messages'] + toolResults
     else:
         state['messages'].append(messages.AIMessage("No plotting tools were called"))
@@ -113,9 +115,6 @@ agentGraph.add_node("loadData", loadData)
 agentGraph.add_node("promptAgent", promptAgent)
 agentGraph.add_node("plotAgent", plotAgent)
 agentGraph.add_node("evaluateAgent", evaluateAgent)
-evaluateTool = ToolNode(tools = [convertImage])
-agentGraph.add_node("evaluateTool", evaluateTool)
-agentGraph.add_node("router", lambda x: x)
 agentGraph.add_node("trimNode", trimNode)
 
 #adding the edges needed for travel between nodes
@@ -124,9 +123,7 @@ agentGraph.add_edge("clearNode", END)
 agentGraph.add_edge("loadData", "promptAgent")
 agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "evaluateEdge": "evaluateAgent"})
 agentGraph.add_edge("plotAgent", "evaluateAgent")
-agentGraph.add_conditional_edges("evaluateAgent", evaluationRouter, {"routerEdge": "router", "toolEdge": "evaluateTool"})
-agentGraph.add_edge("evaluateTool", "evaluateAgent")
-agentGraph.add_conditional_edges("router", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
+agentGraph.add_conditional_edges("evaluateAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
 agentGraph.add_edge("trimNode", END)
 
 eatronAssistant = agentGraph.compile()
