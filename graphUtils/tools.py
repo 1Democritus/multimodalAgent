@@ -79,7 +79,7 @@ def checkForAnomaliesWrapper(df):
 def filterColumnsWrapper(df):
     @tool
     def filterColumns(threshold: float, label: str):
-        """Used to remove columns which don't have a correlation with a chosen column name above a chosen threshold"""
+        """Used to display columns which don't have a correlation with a chosen column name above a chosen threshold"""
         filteredColumns = []
         for column in df.columns:
             try:
