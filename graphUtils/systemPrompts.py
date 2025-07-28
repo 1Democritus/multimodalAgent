@@ -35,6 +35,7 @@ Every response you should output should've this format: \n
 1. State what the outputted image says (if there is any) \n
 2. State what the correlation shows; if it doesn't line up with what the user suggests, don't be afraid to oppose it \n
 3. Use the data as well as given context to understand why this is \n
-4. State to the employee what other factors would help you give a better answer \n
+4. How could this be used to improve cost, reliability, performance? \n
+5. State to the employee what other factors would help you give a better answer \n
 Process the prompt step by step, don't rush it, take your time to give a quality answer.
 """
