@@ -37,7 +37,7 @@ def trimNode(state: llmAgent) -> llmAgent:
 
 def initialRouter(state: llmAgent) -> llmAgent:
     lastMessage = state['messages'][-1].content
-    if lastMessage == "Code White":
+    if lastMessage == "Code Black":
         return "clearEdge"
     elif state['file'] == "":
         return "evaluateEdge"
