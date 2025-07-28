@@ -50,10 +50,11 @@ def invokeAgent(userInput, history, file):
                 else:
                     history.append((userInput, content))
             else:
-                imgContent = response['messages'][-2].content
-                imgMarkdown = f'<img src="data:image/png;base64,{imgContent}" width="300"/>'
+                dataContent = response['messages'][-2].content
+                if isBase64(dataContent):
+                    dataContent = f'<img src="data:image/png;base64,{dataContent}" width="300"/>'
                 textContent = response['messages'][-1].content
-                totalContent = imgMarkdown + " " + textContent
+                totalContent = dataContent + " " + textContent
                 history.append((userInput, totalContent)) #adds to chat history
         except Exception as error:
             history.append((userInput, f"Error arose while processing request: {error}"))
