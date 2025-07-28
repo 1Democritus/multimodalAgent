@@ -19,21 +19,6 @@ def plotDataWrapper(df): #I use wrappers because it allows the tools to access i
         return imgBase64
     return plotData
 
-def displayDistributionWrapper(df): #should fix this later
-    @tool
-    def displayDistribution(columnName: str):
-        """Used to show counts of different instances of data on a column"""
-        if df[columnName].dtype != "int64" and df[columnName].dtype != "float":
-            return "This data can't be visualised due to the data type being incompatible"
-        fig, ax = plt.subplots()
-        df.hist(columnName, ax = ax)
-        buffer = io.BytesIO()
-        fig.savefig(buffer, format = "png")
-        buffer.seek(0)
-        imgBase64 = base64.b64encode(buffer.read()).decode('utf-8')
-        return imgBase64
-    return displayDistribution
-
 def checkMaxCorrelationWrapper(df):
     @tool
     def checkMaxCorrelation(column: str, x: int):
