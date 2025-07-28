@@ -82,7 +82,7 @@ def plotAgent(state:llmAgent) -> llmAgent:
     wholePrompt = wholePrompt.split("|||")
     currentPlotInstruction = messages.HumanMessage(wholePrompt[0])
     systemPrompt = messages.SystemMessage(content = systemPrompts.plotAgentPrompt)
-    plottingTools = [plotDataWrapper(state['df']), displayDistributionWrapper(state['df']), 
+    plottingTools = [plotDataWrapper(state['df']), 
                      checkMaxCorrelationWrapper(state['df']), checkMinCorrelationWrapper(state['df']), 
                      checkForAnomaliesWrapper(state['df']), filterColumnsWrapper(state['df']),
                      checkNANStatsWrapper(state['df']), returnDescriptionWrapper(state['df'])]
