@@ -9,13 +9,18 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import pandas
 import PIL
+import base64
 
 
-
+def isBase64(s):
+    try:
+        return base64.b64encode(base64.b64decode(s)) == s.encode()
+    except:
+        return False
 
 #import necessary files
-from graphUtils import systemPrompts
-from graphUtils.tools import *
+import systemPrompts
+from tools import *
 
 
 #setup API key and the large language model
@@ -95,11 +100,8 @@ def plotAgent(state:llmAgent) -> llmAgent:
             tool = next(t for t in plottingTools if t.name == toolCall['name'])
             result = messages.AIMessage(content = tool.invoke(toolCall['args']))
             toolResults.append(result)
-        try:
-            PIL.Image.open(toolResults[-1].content)
+        if isBase64(toolResults[-1].content):
             state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1]}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
-        except Exception as e:
-            print(e)
         state['messages'] = state['messages'] + toolResults
     else:
         state['messages'].append(messages.AIMessage("No plotting tools were called"))
