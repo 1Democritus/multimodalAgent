@@ -70,7 +70,6 @@ def loadData(state:llmAgent) -> llmAgent:
     return state
 
 def promptAgent(state: llmAgent) -> llmAgent:
-    print(len(state['messages']))
     systemPrompt = messages.SystemMessage(content = systemPrompts.promptAgentPrompt)
     columnList = state['df'].columns
     response = llm.invoke([systemPrompt] + state['messages'] + [f' | List of columns: {str(columnList)} |']) #inserts system prompt followed by input message
