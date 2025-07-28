@@ -19,8 +19,8 @@ def isBase64(s):
         return False
 
 #import necessary files
-import systemPrompts
-from tools import *
+from graphUtils import systemPrompts
+from graphUtils.tools import *
 
 
 #setup API key and the large language model
