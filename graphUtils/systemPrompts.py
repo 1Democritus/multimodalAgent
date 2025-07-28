@@ -17,7 +17,7 @@ if you think no plotting or calculating is needed, skip this step \n
 if you skipped step 1, also skip step 2
 3. Could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
 Here is the list of tools the plotting agent has to help you with step 1: \n
-plotting two axes of data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of empty values on the database; retuning general stats of database
+plotting two axes of data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of NaN (empty) values on the database; retuning a general description of a single column of the database
 """
 
 plotAgentPrompt = """ \n
