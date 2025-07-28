@@ -46,6 +46,7 @@ def checkMaxCorrelationWrapper(df):
                     columnList[x-1] = (correlation, idx)
             except IndexError: #meaning issue arises from list size, not data being qualitative
                 columnList.append((correlation, idx))
+            print(columnList)
             columnList = sorted(columnList, reverse = True)
         return str(columnList)
     return checkMaxCorrelation
@@ -95,6 +96,7 @@ def checkNANStatsWrapper(df):
     def checkNANStats():
         """Checks the count of empty values on the database, which is shown as NaN"""
         nanSum = df.isna().sum()
+        print(nanSum)
         return str(nanSum)
     return checkNANStats
 
