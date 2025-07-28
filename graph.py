@@ -8,6 +8,7 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import pandas
+import PIL
 
 
 
@@ -95,6 +96,7 @@ def plotAgent(state:llmAgent) -> llmAgent:
             result = messages.AIMessage(content = tool.invoke(toolCall['args']))
             toolResults.append(result)
         try:
+            PIL.Image.open(toolResults[-1].content)
             state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1]}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
         except Exception as e:
             print(e)
