@@ -55,10 +55,9 @@ def trimRouter(state: llmAgent) -> llmAgent: #to check if chat history is too lo
     
 def agentRouter(state: llmAgent) -> llmAgent: #decides if this prompt is for the plotting agent or the analysing agent
     wholePrompt = state['messages'][-1].content
-    try:
-        wholePrompt = wholePrompt.split("|||")
+    if "|||" in wholePrompt:
         return "plotEdge"
-    except:
+    else:
         return "evaluateEdge"
     
 def evaluationRouter(state: llmAgent) -> llmAgent:
