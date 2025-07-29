@@ -4,7 +4,7 @@ from langchain_core import messages
 import base64
 from dotenv import load_dotenv
 load_dotenv(override = True) #loads in API key from environment
-from graph import eatronAssistant
+from workflow import eatronAssistant
 
 class Conversation:
     def __init__(self):
