@@ -95,7 +95,7 @@ def plotAgent(state:llmAgent) -> llmAgent:
         toolResults = []
         for toolCall in response.tool_calls:
             tool = next(t for t in plottingTools if t.name == toolCall['name'])
-            result = messages.AIMessage(content = tool.invoke(toolCall['args']))
+            result = messages.AIMessage(content = tool.invoke(toolCall['args']) if tool else f"Tool {toolCall['name']} not found")
             toolResults.append(result)
         if isBase64(toolResults[-1].content):
             state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1] if len(wholePrompt) > 1 else "Analyse and give insight to plot: "}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
