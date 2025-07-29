@@ -8,7 +8,6 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import pandas
-import PIL
 import base64
 
 
