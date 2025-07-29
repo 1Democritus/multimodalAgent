@@ -5,7 +5,7 @@ from typing_extensions import TypedDict
 from langchain_core import messages
 from langchain_openai import ChatOpenAI
 from langgraph.graph.message import add_messages
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, END
 import pandas
 import base64
 
@@ -35,7 +35,8 @@ def clearNode(state:llmAgent) -> llmAgent:
 
 def trimNode(state: llmAgent) -> llmAgent:
     """Removes least recent messages after the chat history reaches a certain size"""
-    state['messages'] = state['messages'][4:]
+    if len(state['messages']) > 17:
+        state['messages'] = state['messages'][4:]
     return state
 
 def initialRouter(state: llmAgent) -> llmAgent:
@@ -47,9 +48,9 @@ def initialRouter(state: llmAgent) -> llmAgent:
     else:
         return "loadEdge"
 
-def trimRouter(state: llmAgent) -> llmAgent: #to check if chat history is too long
-    if len(state['messages']) > 15:
-        return "trimEdge"
+def plotRouter(state: llmAgent) -> llmAgent:
+    if isinstance(state['messages'][-1], messages.HumanMessage):
+        return "evaluateEdge"
     else:
         return "endEdge"
     
@@ -57,15 +58,10 @@ def agentRouter(state: llmAgent) -> llmAgent: #decides if this prompt is for the
     wholePrompt = state['messages'][-1].content
     if "|||" in wholePrompt:
         return "plotEdge"
+    elif wholePrompt[0] == "P":
+        return "plotEdge"
     else:
         return "evaluateEdge"
-    
-def evaluationRouter(state: llmAgent) -> llmAgent:
-    lastMsg = state['messages'][-1]
-    if not lastMsg.tool_calls:
-        return "routerEdge"
-    else:
-        return "toolEdge"
     
 def loadData(state:llmAgent) -> llmAgent:
     """Used to load data from a saved file and use it to create a pandas dataframe"""
@@ -97,9 +93,10 @@ def plotAgent(state:llmAgent) -> llmAgent:
             tool = next(t for t in plottingTools if t.name == toolCall['name']) #iterates through the tools to find the one matching the call
             result = messages.AIMessage(content = tool.invoke(toolCall['args']) if tool else f"Tool {toolCall['name']} not found") 
             toolResults.append(result)
-        if isBase64(toolResults[-1].content):
-            state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1] if len(wholePrompt) > 1 else "Analyse and give insight to plot: "}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
-        state['messages'] = state['messages'] + toolResults
+        if isBase64(toolResults[-1].content) and len(wholePrompt) > 1:
+            state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1]}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
+        else:
+            state['messages'] = state['messages'] + toolResults
     else:
         state['messages'].append(messages.AIMessage("No plotting tools were called"))
     return state
@@ -120,12 +117,12 @@ agentGraph.add_node("evaluateAgent", evaluateAgent)
 agentGraph.add_node("trimNode", trimNode)
 
 #adding the edges needed for travel between nodes
-agentGraph.add_conditional_edges(START, initialRouter, {"loadEdge": "loadData", "evaluateEdge": "evaluateAgent", "clearEdge": "clearNode"})
+agentGraph.set_entry_point("trimNode")
+agentGraph.add_conditional_edges("trimNode", initialRouter, {"loadEdge": "loadData", "evaluateEdge": "evaluateAgent", "clearEdge": "clearNode"})
 agentGraph.add_edge("clearNode", END)
 agentGraph.add_edge("loadData", "promptAgent")
 agentGraph.add_conditional_edges("promptAgent", agentRouter, {"plotEdge": "plotAgent", "evaluateEdge": "evaluateAgent"})
-agentGraph.add_edge("plotAgent", "evaluateAgent")
-agentGraph.add_conditional_edges("evaluateAgent", trimRouter, {"trimEdge": "trimNode", "endEdge": END})
-agentGraph.add_edge("trimNode", END)
+agentGraph.add_conditional_edges("plotAgent", plotRouter, {"evaluateEdge": "evaluateAgent", "endEdge": END})
+agentGraph.add_edge("evaluateAgent", END)
 
 eatronAssistant = agentGraph.compile()
