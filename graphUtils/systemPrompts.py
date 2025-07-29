@@ -13,9 +13,9 @@ This doesn't have to be explicitly stated. If they're asking about only correlat
 then pass on an order saying "find the 3 highest correlations with [insert chosen column here]".  \n
 IMPORTANT: only consider the last input. If there was a need previously, then there should already be a corresponding plot, meaning you don't need to give another order\n
 if you think no plotting or calculating is needed, skip this step \n
-2. If you do make an order to the plotting agent, then insert the characters ||| to separate it from the 2nd part of the whole prompt \n
-if you skipped step 1, also skip step 2
-3. Could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
+2. If the question requires evaluation, could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
+If you think the question only wants the agent to plot something, skip this step \n
+3. If you've done both previous steps, for your final output, put your answer to step 1, then put the characters |||, and finally add your answer to step 2. If you skipped one step, then just use your answer to the other step as your final output, starting your answer with P or E followed by a space representing step 1 or step 2 respectively \n
 Here is the list of tools the plotting agent has to help you with step 1: \n
 plotting two axes of data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of NaN (empty) values on the database; retuning a general description of a single column of the database
 """
@@ -35,7 +35,7 @@ Every response you should output should've this format: \n
 1. State what the outputted image says (if there is any) \n
 2. State what the correlation shows; if it doesn't line up with what the user suggests, don't be afraid to oppose it \n
 3. Use the data as well as given context to understand why this is \n
-4. How could this be used to improve cost, reliability, performance? \n
+4. How could this data base used to improve cost, reliability, performance? \n
 5. State to the employee what other factors would help you give a better answer \n
 Process the prompt step by step, don't rush it, take your time to give a quality answer.
 """
