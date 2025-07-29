@@ -87,15 +87,15 @@ def plotAgent(state:llmAgent) -> llmAgent:
     plottingTools = [plotDataWrapper(state['df']), displayDistributionWrapper(state['df']),
                      checkMaxCorrelationWrapper(state['df']), checkMinCorrelationWrapper(state['df']), 
                      checkForAnomaliesWrapper(state['df']), filterColumnsWrapper(state['df']),
-                     checkNANStatsWrapper(state['df']), returnDescriptionWrapper(state['df'])]
+                     checkNANStatsWrapper(state['df']), returnDescriptionWrapper(state['df'])] 
     plotllm = llm.bind_tools(plottingTools)
     response = plotllm.invoke([systemPrompt, currentPlotInstruction])
     if hasattr(response, 'tool_calls') and response.tool_calls:
         # Add tool execution logic here
         toolResults = []
         for toolCall in response.tool_calls:
-            tool = next(t for t in plottingTools if t.name == toolCall['name'])
-            result = messages.AIMessage(content = tool.invoke(toolCall['args']) if tool else f"Tool {toolCall['name']} not found")
+            tool = next(t for t in plottingTools if t.name == toolCall['name']) #iterates through the tools to find the one matching the call
+            result = messages.AIMessage(content = tool.invoke(toolCall['args']) if tool else f"Tool {toolCall['name']} not found") 
             toolResults.append(result)
         if isBase64(toolResults[-1].content):
             state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1] if len(wholePrompt) > 1 else "Analyse and give insight to plot: "}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
