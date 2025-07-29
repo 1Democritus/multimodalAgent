@@ -13,6 +13,8 @@ class Conversation:
         self._history = history
     def getHistory(self):
         return self._history
+    def resetHistory(self):
+        self._history = []
 
 server = None
 
@@ -22,7 +24,9 @@ def isBase64(s):
     except:
         return False
     
+conversationStorage = Conversation()
 def clearChat(): #clears chat as well as message history on internal files
+    conversationStorage.resetHistory()
     eatronAssistant.invoke({
         "messages": [messages.HumanMessage(content = "Code Black")],
         "file": ""
@@ -30,7 +34,6 @@ def clearChat(): #clears chat as well as message history on internal files
     return [], []
 
 # Main function to handle chat input
-conversationStorage = Conversation()
 def invokeAgent(userInput, history, file):
     msghist = conversationStorage.getHistory()
     if userInput != "QUIT":
@@ -41,7 +44,7 @@ def invokeAgent(userInput, history, file):
                 })
             conversationStorage.storeHistory(response['messages'])
             
-            if isinstance(response['messages'][-2], messages.HumanMessage): #meaning only plot/analyse/evaluation, not one of the former followed by the latter
+            if not isinstance(response['messages'][-2].content, list): #meaning only plot/analyse/evaluation, not one of the former followed by the latter
                 content = response['messages'][-1].content
 
                 if isBase64(content):
@@ -51,10 +54,11 @@ def invokeAgent(userInput, history, file):
                     history.append((userInput, content))
             else:
                 dataContent = response['messages'][-2].content
-                if isBase64(dataContent):
-                    dataContent = f'<img src="data:image/png;base64,{dataContent}" width="300"/>'
+                dataContentImage = dataContent[1]['image_url']['url'][22:]
+                if isBase64(dataContentImage):
+                    dataContentImage = f'<img src="data:image/png;base64,{dataContentImage}" width="300"/>'
                 textContent = response['messages'][-1].content
-                totalContent = dataContent + " " + textContent
+                totalContent = dataContentImage + " " + textContent
                 history.append((userInput, totalContent)) #adds to chat history
         except Exception as error:
             history.append((userInput, f"Error arose while processing request: {error}"))
