@@ -6,14 +6,17 @@ import base64
 
 def plotDataWrapper(df): #I use wrappers because it allows the tools to access internal variables within agents such as dataframes
     @tool
-    def plotData(xLabel: str, yLabel: str):
-        """Used to plot a group of x data and y data, giving both axes an appropriate label"""
-        plt.scatter(df[xLabel], df[yLabel])
-        plt.xlabel(xLabel)
-        plt.ylabel(yLabel)
+    def plotData(xLabel: str, yLabels: list):
+        """Used to plot a group of x data against a list of y data, giving both axes an appropriate label and outputting a single or a group of plots"""
+        fig, axes = plt.subplots(1, len(yLabels), figsize = (7*len(yLabels),6), constrained_layout = True)
+        if len(yLabels) == 1:
+            axes = [axes] #as this would make axes a single object therefore I couldn't execute the coming loop
+        for k in range(len(yLabels)):
+            axes[k].plot(df[xLabel], df[yLabels[k]])
+            axes[k].set_title(f"{yLabels[k]} against {xLabel}")
         buffer = io.BytesIO() #saves plot into buffer file
-        plt.savefig(buffer, format = 'png')
-        plt.close()
+        fig.savefig(buffer, format = 'png')
+        plt.close(fig)
         buffer.seek(0) #moves internal pointer from end of data to start
         imgBase64 = base64.b64encode(buffer.read()).decode('utf-8')
         return imgBase64
