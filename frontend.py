@@ -48,8 +48,8 @@ def invokeAgent(userInput, history, file):
                 content = response['messages'][-1].content
 
                 if isBase64(content):
-                    img_html = f'<img src="data:image/png;base64,{content}" width="300"/>'
-                    history.append((userInput, img_html))
+                    imgHTML = f'<img src="data:image/png;base64,{content}" width="300"/>'
+                    history.append((userInput, imgHTML))
                 else:
                     history.append((userInput, content))
             else:
