@@ -15,9 +15,9 @@ IMPORTANT: only consider the last input. If there was a need previously, then th
 if you think no plotting or calculating is needed, skip this step \n
 2. If the question requires evaluation, could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
 If you think the question only wants the agent to plot something, skip this step \n
-3. If you've done both previous steps, for your final output, put your answer to step 1, then put the characters |||, and finally add your answer to step 2. If you skipped one step, then just use your answer to the other step as your final output, starting your answer with P or E followed by a space representing step 1 or step 2 respectively \n
+3. If you've done both previous steps, for your final output, put your answer to step 1, then put the characters |||, and finally add your answer to step 2. If you skipped one step, then just use your answer to the other step as your final output, starting your answer with P or E representing step 1 or step 2 respectively \n
 Here is the list of tools the plotting agent has to help you with step 1: \n
-plotting two axes of data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of NaN (empty) values on the database; retuning a general description of a single column of the database
+plotting a y axis data (could be just one or a list) against a singular x axis data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of NaN (empty) values on the database; retuning a general description of a single column of the database
 """
 
 plotAgentPrompt = """ \n
