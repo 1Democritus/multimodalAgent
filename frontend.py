@@ -48,7 +48,7 @@ def invokeAgent(userInput, history, file):
                 content = response['messages'][-1].content
 
                 if isBase64(content):
-                    imgHTML = f'<img src="data:image/png;base64,{content}" width="300"/>'
+                    imgHTML = f'<img src="data:image/png;base64,{content}" style="max-width: 100%; max-height: 100%; width: auto; height: auto;" />'
                     history.append((userInput, imgHTML))
                 else:
                     history.append((userInput, content))
@@ -56,7 +56,7 @@ def invokeAgent(userInput, history, file):
                 dataContent = response['messages'][-2].content
                 dataContentImage = dataContent[1]['image_url']['url'][22:]
                 if isBase64(dataContentImage):
-                    dataContentImage = f'<img src="data:image/png;base64,{dataContentImage}" width="300"/>'
+                    dataContentImage = f'<img src="data:image/png;base64,{dataContentImage}" style="max-width: 100%; max-height: 100%; width: auto; height: auto;" />'
                 textContent = response['messages'][-1].content
                 totalContent = dataContentImage + " " + textContent
                 history.append((userInput, totalContent)) #adds to chat history
