@@ -48,20 +48,18 @@ def initialRouter(state: llmAgent) -> llmAgent:
     else:
         return "loadEdge"
 
-def plotRouter(state: llmAgent) -> llmAgent:
+def plotRouter(state: llmAgent) -> llmAgent: #decides if evaluating the last plot is required
     if isinstance(state['messages'][-1], messages.HumanMessage):
         return "evaluateEdge"
     else:
         return "endEdge"
     
 def agentRouter(state: llmAgent) -> llmAgent: #decides if this prompt is for the plotting agent or the analysing agent
-    wholePrompt = state['messages'][-1].content
-    if "|||" in wholePrompt:
-        return "plotEdge"
-    elif wholePrompt[0] == "P":
-        return "plotEdge"
-    else:
+    wholePrompt = state['messages'][-1].content.split("|||")
+    if wholePrompt[0] == "":
         return "evaluateEdge"
+    else:
+        return "plotEdge"
     
 def loadData(state:llmAgent) -> llmAgent:
     """Used to load data from a saved file and use it to create a pandas dataframe"""
@@ -93,7 +91,7 @@ def plotAgent(state:llmAgent) -> llmAgent:
             tool = next(t for t in plottingTools if t.name == toolCall['name']) #iterates through the tools to find the one matching the call
             result = messages.AIMessage(content = tool.invoke(toolCall['args']) if tool else f"Tool {toolCall['name']} not found") 
             toolResults.append(result)
-        if isBase64(toolResults[-1].content) and len(wholePrompt) > 1:
+        if isBase64(toolResults[-1].content) and wholePrompt[1] != "":
             state['messages'][-1] = messages.HumanMessage(content = [{"type": "text", "text": wholePrompt[1]}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{toolResults[-1].content}"}}])
         else:
             state['messages'] = state['messages'] + toolResults
