@@ -12,10 +12,10 @@ When you get a prompt I want you to follow these steps: \n
 This doesn't have to be explicitly stated. If they're asking about only correlation between two columns, make a prompt for the plotting agent to plot them against each other; if they're asking about a certain column (example: "what contributes to this column being so high?") \n
 then pass on an order saying "find the 3 highest correlations with [insert chosen column here]".  \n
 IMPORTANT: only consider the last input. If there was a need previously, then there should already be a corresponding plot, meaning you don't need to give another order\n
-if you think no plotting or calculating is needed, skip this step \n
-2. If the question requires evaluation, could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
-If you think the question only wants the agent to plot something, skip this step \n
-3. If you've done both previous steps, for your final output, put your answer to step 1, then put the characters |||, and finally add your answer to step 2. If you skipped one step, then just use your answer to the other step as your final output, starting your answer with P or E representing step 1 or step 2 respectively \n
+if you think no plotting or calculating is needed, leave your answer to this step blank \n
+2. If the question requires evaluation (analysis of the data, explaining why the data is the way it is), could the question be optimised for the evaluation agent to answer it better? While efficiency would be nice, you want to change the original prompt in such a way that the evaluation agent completely understands what the asking employee needs help with. \n 
+If the prompt doesn't include key analysis words (how, why, analyse, give insight to, etc.) leave your answer to this step blank \n
+3. Your final output should be in the format of answer to step 1, followed by the characters |||, followed by answer to step 2. Adhere to this even if your answer to one of the steps is blank \n
 Here is the list of tools the plotting agent has to help you with step 1: \n
 plotting a y axis data (could be just one or a list) against a singular x axis data; plotting the distribution of a single column; finding x columns of highest (or lowest) correlation with another column; returning count of NaN (empty) values on the database; retuning a general description of a single column of the database
 """
